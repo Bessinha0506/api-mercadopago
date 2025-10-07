@@ -1,5 +1,3 @@
-# app.py - Versão Final para Produção (Segura e Correta)
-
 from flask import Flask, request, jsonify
 import mercadopago
 import requests
@@ -7,12 +5,22 @@ import os
 
 app = Flask(__name__)
 
-# O código lê as chaves e URLs do ambiente configurado no Render.
-# É assim que se faz em produção.
+# ===============================
+# NOVA ROTA DE STATUS (RAIZ)
+# ===============================
+@app.route("/")
+def index():
+    return jsonify({
+        "status": "online",
+        "message": "API do Mercado Pago está operacional."
+    })
+# ===============================
+
+# O resto do seu código permanece o mesmo...
+
 MERCADO_PAGO_TOKEN = os.environ.get("MERCADO_PAGO_TOKEN")
 ASPNET_API_URL = os.environ.get("ASPNET_API_URL")
 
-# Verificação para garantir que as variáveis foram configuradas
 if not MERCADO_PAGO_TOKEN:
     raise ValueError("A variável de ambiente MERCADO_PAGO_TOKEN não foi definida no Render.")
 if not ASPNET_API_URL:
@@ -22,6 +30,7 @@ sdk = mercadopago.SDK(MERCADO_PAGO_TOKEN)
 
 @app.route("/criar_preferencia", methods=["POST"])
 def criar_preferencia():
+    # ... (todo o código desta função continua igual)
     dados = request.json
     if not dados:
         return jsonify({"error": "Corpo da requisição está vazio"}), 400
@@ -54,8 +63,10 @@ def criar_preferencia():
         print(f"ERRO ao criar preferência: {e}")
         return jsonify({"error": "Falha ao se comunicar com a API do Mercado Pago"}), 500
 
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    # ... (todo o código desta função continua igual)
     data_payload = request.json
     payment_id = None
 
