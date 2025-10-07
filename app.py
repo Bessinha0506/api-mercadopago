@@ -1,4 +1,4 @@
-# app.py - Versão Final e Pronta para Produção
+# app.py - VERSÃO FINAL DE PRODUÇÃO
 
 from flask import Flask, request, jsonify
 import mercadopago
@@ -17,7 +17,7 @@ logging.basicConfig(
     stream=sys.stdout
 )
 
-# --- Função para o Trabalho Pesado em Segundo Plano ---
+# --- Função que faz o trabalho pesado em segundo plano ---
 def process_payment(payment_id, app_context):
     with app_context:
         app.logger.info(f"[THREAD] Iniciando processamento para o pagamento {payment_id}...")
@@ -64,7 +64,7 @@ def criar_preferencia():
     preference_data = {
         "items": [{"title": dados.get("title", "Produto"), "quantity": 1, "currency_id": "BRL", "unit_price": float(dados.get("unit_price", 0))}],
         "external_reference": str(pedido_id),
-        "notification_url": f"{render_url}/webhook" # 🔑 A linha que faltava!
+        "notification_url": f"{render_url}/webhook"
     }
     
     app.logger.info(f"Enviando para o Mercado Pago: {preference_data}")
@@ -87,5 +87,3 @@ def webhook():
 
     return jsonify({"status": "notification received"}), 200
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5001)))
