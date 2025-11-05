@@ -1,6 +1,6 @@
-# app.py - VERSÃO FINAL USANDO A TELA E O REDIRECIONAMENTO DO PRÓPRIO MERCADO PAGO
+# app.py - VERSÃO COM REDIRECIONAMENTO DIRETO PARA A APLICAÇÃO FINAL
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 import mercadopago
 import requests
 import os
@@ -61,24 +61,23 @@ def criar_preferencia():
     pedido_id = dados.get("pedido_id")
     render_url = os.environ.get("RENDER_EXTERNAL_URL")
     
+    # --- ALTERAÇÃO PRINCIPAL ---
     # URL de destino final para o redirecionamento
     redirect_url_final = "http://localhost:52415/Conta/Pedidos"
+    # URL para falha (pode ser uma página na sua aplicação .NET também )
+    redirect_url_falha = "http://localhost:52415/Conta/PagamentoFalhou" # Exemplo
 
     preference_data = {
         "items": [{"title": dados.get("title", "Produto"  ), "quantity": 1, "currency_id": "BRL", "unit_price": float(dados.get("unit_price", 0))}],
         "external_reference": str(pedido_id),
         "notification_url": f"{render_url}/webhook",
-        
-        # --- CONFIGURAÇÃO CORRETA AQUI ---
-        # Aponta para a URL final. O Mercado Pago mostrará sua própria tela de sucesso
-        # e depois redirecionará para cá.
+        # --- NOVO: URLs de retorno apontam DIRETAMENTE para sua aplicação final ---
         "back_urls": {
-            "success": redirect_url_final,
-            "failure": f"{render_url}/pagamento_falha",
-            "pending": f"{render_url}/pagamento_pendente"
+            "success": redirect_url_final, # Redireciona direto para a lista de pedidos
+            "failure": redirect_url_falha, # Redireciona para uma página de falha no seu app .NET
+            "pending": redirect_url_final  # Pode ser a mesma de sucesso ou uma específica
         },
-        # Este parâmetro ativa o redirecionamento automático.
-        "auto_return": "approved"
+        "auto_return": "approved" # Essencial para o redirecionamento automático
     }
     
     app.logger.info(f"Enviando para o Mercado Pago: {preference_data}")
@@ -101,13 +100,7 @@ def webhook():
 
     return jsonify({"status": "notification received"}), 200
 
-# --- ROTA /pagamento_sucesso FOI REMOVIDA, POIS NÃO É NECESSÁRIA ---
-
-# --- Rotas para falha e pendente ---
-@app.route("/pagamento_falha")
-def pagamento_falha():
-    return "<h1>Ocorreu uma falha no pagamento.</h1><p>Por favor, tente novamente.</p>"
-
-@app.route("/pagamento_pendente")
-def pagamento_pendente():
-    return "<h1>Seu pagamento está pendente.</h1><p>Aguarde a confirmação.</p>"
+# --- ROTAS REMOVIDAS ---
+# A rota "/pagamento_sucesso" não é mais necessária e foi removida.
+# As rotas "/pagamento_falha" e "/pagamento_pendente" também podem ser removidas
+# se você redirecionar o usuário para páginas equivalentes na sua aplicação .NET.
