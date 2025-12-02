@@ -101,7 +101,7 @@ def webhook():
 @app.route("/pagamento_sucesso")
 def pagamento_sucesso():
     # URL de destino final para o redirecionamento
-    redirect_url_final = "http://localhost:52415/Conta/Pedidos"
+    redirect_url_final = "https://www.photofind.com.br/Conta/Pedidos"
     
     # Template HTML com JavaScript para a contagem regressiva
     html_template = """
