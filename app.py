@@ -62,7 +62,7 @@ def criar_preferencia():
     render_url = os.environ.get("RENDER_EXTERNAL_URL")
     
     # URL de destino final para o redirecionamento
-    redirect_url_final = "http://localhost:52415/Conta/Pedidos"
+    redirect_url_final = "https://www.photofind.com.br/Conta/Pedidos"
 
     preference_data = {
         "items": [{"title": dados.get("title", "Produto" ), "quantity": 1, "currency_id": "BRL", "unit_price": float(dados.get("unit_price", 0))}],
@@ -155,3 +155,4 @@ def pagamento_falha():
 @app.route("/pagamento_pendente")
 def pagamento_pendente():
     return "<h1>Seu pagamento está pendente.</h1><p>Aguarde a confirmação ou verifique seu e-mail.</p>"
+
