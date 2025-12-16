@@ -10,14 +10,14 @@ import threading
 
 app = Flask(__name__)
 
-# --- Configuração do Logging Profissional ---
+# Config
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]',
     stream=sys.stdout
 )
 
-# --- Função que faz o trabalho pesado em segundo plano ---
+# Funções
 def process_payment(payment_id, app_context):
     with app_context:
         app.logger.info(f"[THREAD] Iniciando processamento para o pagamento {payment_id}...")
@@ -43,17 +43,17 @@ def process_payment(payment_id, app_context):
         except Exception as e:
             app.logger.error(f"[THREAD] ERRO CRÍTICO ao processar webhook: {e}")
 
-# --- Rota de Status (/) ---
+# Rotas
 @app.route("/")
 def index():
     return jsonify({"status": "online", "message": "API de Pagamentos está operacional."})
 
-# --- Configuração das Variáveis de Ambiente ---
+
 MERCADO_PAGO_TOKEN = os.environ.get("MERCADO_PAGO_TOKEN")
 ASPNET_API_URL = os.environ.get("ASPNET_API_URL")
 sdk = mercadopago.SDK(MERCADO_PAGO_TOKEN)
 
-# --- Rota para Criar Preferência de Pagamento ---
+
 @app.route("/criar_preferencia", methods=["POST"])
 def criar_preferencia():
     dados = request.json
@@ -61,14 +61,14 @@ def criar_preferencia():
     pedido_id = dados.get("pedido_id")
     render_url = os.environ.get("RENDER_EXTERNAL_URL")
     
-    # URL de destino final para o redirecionamento
+    # Redirecionamento
     redirect_url_final = "https://www.photofind.com.br/Conta/Pedidos"
 
     preference_data = {
         "items": [{"title": dados.get("title", "Produto" ), "quantity": 1, "currency_id": "BRL", "unit_price": float(dados.get("unit_price", 0))}],
         "external_reference": str(pedido_id),
         "notification_url": f"{render_url}/webhook",
-        # --- NOVO: Adiciona as URLs de retorno ---
+        
         "back_urls": {
             "success": f"{render_url}/pagamento_sucesso?pedido_id={pedido_id}",
             "failure": f"{render_url}/pagamento_falha?pedido_id={pedido_id}",
@@ -81,7 +81,7 @@ def criar_preferencia():
     preference_response = sdk.preference().create(preference_data)
     return jsonify(preference_response["response"])
 
-# --- Rota de Webhook (Rápida e Assíncrona) ---
+# Webhook 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     app.logger.info("Webhook recebido! Respondendo OK e iniciando processo em background.")
@@ -97,13 +97,13 @@ def webhook():
 
     return jsonify({"status": "notification received"}), 200
 
-# --- NOVA ROTA: Página de sucesso com redirecionamento ---
+
 @app.route("/pagamento_sucesso")
 def pagamento_sucesso():
-    # URL de destino final para o redirecionamento
+   
     redirect_url_final = "https://www.photofind.com.br/Conta/Pedidos"
     
-    # Template HTML com JavaScript para a contagem regressiva
+    # Contagem (Tela)
     html_template = """
     <!DOCTYPE html>
     <html lang="pt-BR">
@@ -144,10 +144,10 @@ def pagamento_sucesso():
     </body>
     </html>
     """
-    # Renderiza o HTML passando a URL de destino para o template
+    
     return render_template_string(html_template, redirect_url_final=redirect_url_final)
 
-# --- (Opcional) Rotas para falha e pendente ---
+
 @app.route("/pagamento_falha")
 def pagamento_falha():
     return "<h1>Ocorreu uma falha no pagamento.</h1><p>Por favor, tente novamente.</p>"
@@ -155,4 +155,5 @@ def pagamento_falha():
 @app.route("/pagamento_pendente")
 def pagamento_pendente():
     return "<h1>Seu pagamento está pendente.</h1><p>Aguarde a confirmação ou verifique seu e-mail.</p>"
+
 
