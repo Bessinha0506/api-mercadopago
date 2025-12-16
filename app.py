@@ -1,4 +1,4 @@
-# app.py - VERSÃO FINAL DE PRODUÇÃO (COM REDIRECIONAMENTO)
+
 
 from flask import Flask, request, jsonify, render_template_string
 import mercadopago
@@ -155,5 +155,6 @@ def pagamento_falha():
 @app.route("/pagamento_pendente")
 def pagamento_pendente():
     return "<h1>Seu pagamento está pendente.</h1><p>Aguarde a confirmação ou verifique seu e-mail.</p>"
+
 
 
